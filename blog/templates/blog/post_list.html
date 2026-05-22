@@ -1,0 +1,284 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Semua Artikel - Aura.Blog{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* HERO HEADER */
+    .hero-card {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 24px;
+        padding: 3.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+    }
+    
+    .hero-card::before {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        top: -100px;
+        right: -50px;
+        pointer-events: none;
+    }
+    
+    .hero-card::after {
+        content: '';
+        position: absolute;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+        bottom: -50px;
+        left: -50px;
+        pointer-events: none;
+    }
+
+    .hero-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1.2;
+    }
+
+    /* SEARCH INPUT */
+    .search-container {
+        max-width: 600px;
+        margin: -1.5rem auto 3rem auto;
+        position: relative;
+        z-index: 10;
+    }
+
+    .search-box {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        padding: 0.9rem 1.5rem 0.9rem 3rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-box:focus {
+        border-color: #6366f1;
+        box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+        outline: none;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1.2rem;
+    }
+
+    /* CATEGORY PILLS */
+    .category-scroll {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        margin-bottom: 2.5rem;
+        scrollbar-width: none; /* Firefox */
+    }
+
+    .category-scroll::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
+
+    .pill-item {
+        white-space: nowrap;
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .pill-item:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: var(--navy-dark);
+        transform: translateY(-1px);
+    }
+
+    .pill-item.active {
+        background: var(--primary-grad);
+        border-color: transparent;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    }
+
+    /* AUTHOR AVATAR */
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--accent-grad);
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-transform: uppercase;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* CATEGORY TAG */
+    .tag-category {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        background: rgba(99, 102, 241, 0.08);
+        color: #4f46e5;
+        display: inline-block;
+        margin-bottom: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<div class="hero-card text-center text-white">
+    <div class="col-lg-8 mx-auto">
+        <span class="badge bg-indigo mb-2 px-3 py-2 text-uppercase fw-bold" style="background-color: #6366f1;">Jelajahi Ide</span>
+        <h1 class="hero-title text-white">Ruang Ekspresi & <br>Catatan Pemikiran Kreatif</h1>
+        <p class="lead text-light-50 mt-3 opacity-75">
+            Mulai menulis jurnal harian Anda, bagikan artikel bermanfaat, dan pelajari topik-topik baru dari berbagai kategori.
+        </p>
+    </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-container">
+    <form method="GET" action="{% url 'post-list' %}">
+        <div class="position-relative">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" name="q" value="{{ query }}" placeholder="Cari judul catatan atau isi konten..." class="form-control search-box">
+            {% if active_category %}
+                <input type="hidden" name="category" value="{{ active_category.slug }}">
+            {% endif %}
+            <button type="submit" class="btn btn-premium position-absolute end-0 top-0 h-100 rounded-start-0" style="border-radius: 0 16px 16px 0;">
+                Cari
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- CATEGORY FILTER PILLS -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold m-0"><i class="bi bi-filter-left"></i> Kategori Artikel</h5>
+    {% if query or active_category %}
+        <a href="{% url 'post-list' %}" class="btn btn-sm btn-link text-decoration-none text-muted">
+            <i class="bi bi-x-circle"></i> Reset Filter
+        </a>
+    {% endif %}
+</div>
+
+<div class="category-scroll">
+    <a href="{% url 'post-list' %}{% if query %}?q={{ query }}{% endif %}" class="pill-item {% if not active_category %}active{% endif %}">
+        📦 Semua
+    </a>
+    {% for cat in categories %}
+        <a href="{% url 'post-list' %}?category={{ cat.slug }}{% if query %}&q={{ query }}{% endif %}" 
+           class="pill-item {% if active_category.slug == cat.slug %}active{% endif %}">
+            🏷️ {{ cat.name }} <span class="badge rounded-pill bg-light text-dark ms-1 small">{{ cat.post_count }}</span>
+        </a>
+    {% endfor %}
+</div>
+
+<!-- POST LIST -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="m-0 fw-bold">
+            {% if active_category %}
+                Kategori: {{ active_category.name }}
+            {% elif query %}
+                Hasil Pencarian untuk: "{{ query }}"
+            {% else %}
+                📚 Semua Catatan Terbaru
+            {% endif %}
+        </h3>
+        <p class="text-muted m-0 small mt-1">Ditemukan {{ posts|length }} artikel</p>
+    </div>
+    {% if user.is_authenticated %}
+        <a href="{% url 'post-create' %}" class="btn btn-premium">+ Tulis Catatan Baru</a>
+    {% endif %}
+</div>
+
+{% if posts %}
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card card-premium h-100 d-flex flex-column justify-content-between">
+                <div class="card-body">
+                    {% if post.category %}
+                        <span class="tag-category">{{ post.category.name }}</span>
+                    {% else %}
+                        <span class="tag-category" style="background: rgba(100,116,139,0.08); color: #64748b;">Umum</span>
+                    {% endif %}
+                    <h5 class="card-title mb-2">
+                        <a href="{% url 'post-detail' post.pk %}" class="text-decoration-none text-dark hover-indigo" style="font-family: 'Outfit'; font-weight:700;">
+                            {{ post.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-muted mb-4 small">
+                        {{ post.content|truncatewords:20 }}
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-top-0 pt-0 pb-4 px-4 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-circle">
+                            {{ post.author.username|slice:":1" }}
+                        </div>
+                        <div>
+                            <p class="m-0 small fw-bold text-dark">{{ post.author.username }}</p>
+                            <p class="m-0 small text-muted" style="font-size: 0.75rem;"><i class="bi bi-calendar3"></i> {{ post.created_at|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'post-detail' post.pk %}" class="btn btn-sm btn-premium-outline px-3 py-1 text-center" style="font-size: 0.8rem;">
+                        Baca
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card-premium py-5 text-center my-4 bg-white">
+        <div class="py-4">
+            <i class="bi bi-journal-x text-muted" style="font-size: 4rem;"></i>
+            <h4 class="mt-3 fw-bold text-dark">Belum Ada Catatan</h4>
+            <p class="text-muted col-md-6 mx-auto">
+                {% if query or active_category %}
+                    Tidak ada catatan yang cocok dengan filter atau pencarian Anda. Silakan coba kata kunci lain.
+                {% else %}
+                    Situs ini belum memiliki tulisan. Jadilah pelopor yang mempublikasikan jurnal pertama di sini!
+                {% endif %}
+            </p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'post-create' %}" class="btn btn-premium mt-2">Tulis Sekarang</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-premium mt-2">Login untuk Menulis</a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

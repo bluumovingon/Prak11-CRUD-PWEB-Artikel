@@ -1,0 +1,202 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ post.title }} - Aura.Blog{% endblock %}
+
+{% block extra_css %}
+<style>
+    .post-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .detail-card {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 24px;
+        box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.04);
+        padding: 3rem;
+        margin-bottom: 3rem;
+    }
+
+    @media (max-width: 768px) {
+        .detail-card {
+            padding: 1.5rem;
+        }
+    }
+
+    .detail-category {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.3rem 0.8rem;
+        border-radius: 8px;
+        background: rgba(99, 102, 241, 0.08);
+        color: #4f46e5;
+        margin-bottom: 1.2rem;
+    }
+
+    .detail-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: var(--navy-dark);
+        line-height: 1.2;
+        letter-spacing: -0.5px;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .detail-title {
+            font-size: 2rem;
+        }
+    }
+
+    .meta-bar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #f1f5f9;
+        margin-bottom: 2.5rem;
+    }
+
+    .author-badge {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .avatar-large {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--accent-grad);
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-transform: uppercase;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+
+    .content-body {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #334155;
+        white-space: pre-line;
+    }
+
+    .action-panel {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.2rem;
+        margin-top: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="post-container">
+    <a href="{% url 'post-list' %}" class="btn btn-sm btn-link text-decoration-none text-muted mb-4 px-0">
+        <i class="bi bi-arrow-left"></i> Kembali ke Semua Artikel
+    </a>
+
+    <!-- POST CONTENT CARD -->
+    <article class="detail-card">
+        {% if post.category %}
+            <span class="detail-category"><i class="bi bi-tag-fill"></i> {{ post.category.name }}</span>
+        {% else %}
+            <span class="detail-category" style="background: rgba(100,116,139,0.08); color: #64748b;"><i class="bi bi-tag-fill"></i> Umum</span>
+        {% endif %}
+
+        <h1 class="detail-title">{{ post.title }}</h1>
+
+        <!-- META INFORMATION -->
+        <div class="meta-bar">
+            <div class="author-badge">
+                <div class="avatar-large">
+                    {{ post.author.username|slice:":1" }}
+                </div>
+                <div>
+                    <h6 class="m-0 fw-bold text-dark">{{ post.author.username }}</h6>
+                    <span class="text-muted small">Penulis Artikel</span>
+                </div>
+            </div>
+            
+            <div class="ms-md-auto text-muted small d-flex flex-wrap gap-3">
+                <span>
+                    <i class="bi bi-calendar3 text-indigo"></i> Dibuat: <strong>{{ post.created_at|date:"d M Y, H:i" }}</strong>
+                </span>
+                {% if post.updated_at != post.created_at %}
+                <span>
+                    <i class="bi bi-clock-history text-indigo"></i> Diperbarui: <strong>{{ post.updated_at|date:"d M Y, H:i" }}</strong>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- POST CONTENT BODY -->
+        <div class="content-body">
+            {{ post.content }}
+        </div>
+
+        <!-- MANAGEMENT ACTIONS (ONLY FOR AUTHOR) -->
+        {% if user.is_authenticated and post.author == user %}
+            <div class="action-panel">
+                <div class="text-muted small">
+                    <i class="bi bi-info-circle text-primary"></i> Anda adalah pemilik catatan ini.
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'post-update' post.pk %}" class="btn btn-sm btn-premium px-3">
+                        <i class="bi bi-pencil-square"></i> Edit
+                    </a>
+                    <a href="{% url 'post-delete' post.pk %}" class="btn btn-sm btn-danger px-3" style="background-color: #ef4444; border: none; border-radius:12px; color:white;">
+                        <i class="bi bi-trash"></i> Hapus
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </article>
+
+    <!-- RELATED POSTS -->
+    {% if related_posts %}
+        <div class="mb-5">
+            <h4 class="fw-bold mb-4"><i class="bi bi-journals text-indigo"></i> Artikel Terkait Lainnya</h4>
+            <div class="row">
+                {% for related in related_posts %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card card-premium h-100 p-2 d-flex flex-column justify-content-between">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-2">
+                                    <a href="{% url 'post-detail' related.pk %}" class="text-decoration-none text-dark hover-indigo">
+                                        {{ related.title }}
+                                    </a>
+                                </h6>
+                                <p class="text-muted small mb-0">
+                                    {{ related.content|truncatewords:12 }}
+                                </p>
+                            </div>
+                            <div class="card-footer bg-white border-top-0 pt-0 pb-3 px-3 d-flex align-items-center justify-content-between">
+                                <span class="text-muted small" style="font-size: 0.75rem;"><i class="bi bi-person"></i> {{ related.author.username }}</span>
+                                <a href="{% url 'post-detail' related.pk %}" class="btn btn-xs btn-link text-decoration-none p-0 small fw-bold text-indigo">
+                                    Baca Selengkapnya
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

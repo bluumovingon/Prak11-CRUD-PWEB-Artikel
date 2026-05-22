@@ -1,0 +1,37 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Konfirmasi Hapus - Aura.Blog{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-premium border-danger p-4 p-md-5" style="border-top: 5px solid #ef4444 !important;">
+            <!-- Icon -->
+            <div class="text-center mb-4">
+                <div class="avatar-large mx-auto mb-3" style="background: rgba(239, 68, 68, 0.08); width: 64px; height: 64px; border-radius: 50%; color: #ef4444; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(239,68,68,0.1);">
+                    <i class="bi bi-exclamation-triangle fs-2"></i>
+                </div>
+                <h4 class="fw-bold text-dark">Hapus Catatan Ini?</h4>
+                <p class="text-muted small">Tindakan ini permanen dan tidak dapat dibatalkan.</p>
+            </div>
+
+            <!-- Detail Info -->
+            <div class="p-3 bg-light rounded-3 mb-4 text-center">
+                <span class="text-muted small d-block">Judul Catatan</span>
+                <span class="fw-bold text-dark fs-5">"{{ post.title }}"</span>
+            </div>
+
+            <!-- Actions Form -->
+            <form method="post" class="d-flex flex-column gap-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger w-100 py-2 d-flex align-items-center justify-content-center gap-2" style="background-color: #ef4444; border: none; border-radius: 12px; color:white; font-weight: 600;">
+                    <i class="bi bi-trash"></i> Ya, Hapus Catatan
+                </button>
+                <a href="{% url 'post-detail' post.pk %}" class="btn btn-premium-outline w-100 py-2 d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px;">
+                    Batalkan Hapus
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

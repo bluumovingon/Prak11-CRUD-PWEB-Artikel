@@ -1,0 +1,299 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Dashboard Pengguna - RoBlog{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dash-hero {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .nav-tabs-premium {
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 2rem;
+    }
+
+    .nav-tabs-premium .nav-link {
+        border: none;
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        position: relative;
+        background: transparent;
+    }
+
+    .nav-tabs-premium .nav-link:hover {
+        color: var(--navy-dark);
+        border: none;
+    }
+
+    .nav-tabs-premium .nav-link.active {
+        color: #4f46e5;
+        background: transparent;
+        border: none;
+    }
+
+    .nav-tabs-premium .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--primary-grad);
+        border-radius: 3px;
+    }
+
+    .table-premium th {
+        background-color: #f8fafc;
+        color: var(--navy-dark);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+        padding: 1rem;
+    }
+
+    .table-premium td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.95rem;
+    }
+
+    .table-premium tr:hover td {
+        background-color: #f8fafc;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- WELCOME BANNER -->
+<div class="dash-hero">
+    <div class="row align-items-center">
+        <div class="col-md-8 mb-3 mb-md-0">
+            <h2 class="text-white fw-bold m-0">Halo, {{ user.username }}!</h2>
+            <p class="text-light-50 m-0 opacity-75 mt-1">Selamat datang di ruang kreatif pribadi Anda. Di sini Anda bisa
+                mengelola seluruh artikel dan kategori.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'post-create' %}" class="btn btn-premium px-4"><i class="bi bi-pencil-square me-1"></i>
+                Tulis Artikel Baru</a>
+        </div>
+    </div>
+</div>
+
+<!-- ANALYTICS CARDS -->
+<div class="row mb-5">
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(99, 102, 241, 0.08); color: #4f46e5;">
+                <i class="bi bi-file-earmark-post"></i>
+            </div>
+            <div>
+                <h6 class="text-muted m-0 small fw-bold">Artikel Saya</h6>
+                <h3 class="fw-bold m-0 text-dark">{{ posts|length }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(6, 182, 212, 0.08); color: #06b6d4;">
+                <i class="bi bi-tags"></i>
+            </div>
+            <div>
+                <h6 class="text-muted m-0 small fw-bold">Total Kategori Sedia</h6>
+                <h3 class="fw-bold m-0 text-dark">{{ categories|length }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TABS NAVIGATION -->
+<ul class="nav nav-tabs nav-tabs-premium" id="dashTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts-pane" type="button"
+            role="tab" aria-controls="posts-pane" aria-selected="true">
+            <i class="bi bi-file-text me-1"></i> Artikel Saya
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-pane"
+            type="button" role="tab" aria-controls="categories-pane" aria-selected="false">
+            <i class="bi bi-grid me-1"></i> Kelola Kategori
+        </button>
+    </li>
+</ul>
+
+<!-- TABS CONTENT -->
+<div class="tab-content" id="dashTabsContent">
+    <!-- TAB 1: MY ARTICLES -->
+    <div class="tab-pane fade show active" id="posts-pane" role="tabpanel" aria-labelledby="posts-tab" tabindex="0">
+        <div class="card card-premium overflow-hidden">
+            {% if posts %}
+            <div class="table-responsive">
+                <table class="table table-premium table-borderless m-0">
+                    <thead>
+                        <tr>
+                            <th>Judul Artikel</th>
+                            <th>Kategori</th>
+                            <th>Tanggal Dibuat</th>
+                            <th class="text-end">Aksi Kelola</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in posts %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'post-detail' post.pk %}"
+                                    class="fw-bold text-dark text-decoration-none hover-indigo">
+                                    {{ post.title }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if post.category %}
+                                <span class="badge rounded-pill bg-light text-dark border px-3 py-2 small"
+                                    style="font-weight: 600;">🏷️ {{ post.category.name }}</span>
+                                {% else %}
+                                <span class="text-muted small">Umum</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i> {{
+                                    post.created_at|date:"d M Y, H:i" }}</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-2">
+                                    <a href="{% url 'post-detail' post.pk %}" class="btn btn-sm btn-light border"
+                                        title="Lihat Artikel">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'post-update' post.pk %}" class="btn btn-sm btn-premium-outline"
+                                        style="padding: 0.25rem 0.6rem;" title="Edit Artikel">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'post-delete' post.pk %}" class="btn btn-sm btn-danger"
+                                        style="padding: 0.25rem 0.6rem; background-color: #ef4444; border:none; color:white;"
+                                        title="Hapus Artikel">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="py-5 text-center">
+                <i class="bi bi-journal-x text-muted" style="font-size: 3.5rem;"></i>
+                <h5 class="fw-bold text-dark mt-3">Belum Ada Tulisan</h5>
+                <p class="text-muted small col-md-6 mx-auto mb-3">Anda belum mempublikasikan catatan apa pun. Mulailah
+                    menulis untuk membagikan pemikiran hebat Anda.</p>
+                <a href="{% url 'post-create' %}" class="btn btn-premium btn-sm">+ Tulis Jurnal Pertama Anda</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- TAB 2: MANAGE CATEGORIES -->
+    <div class="tab-pane fade" id="categories-pane" role="tabpanel" aria-labelledby="categories-tab" tabindex="0">
+        <div class="row">
+            <!-- CREATE CATEGORY FORM -->
+            <div class="col-lg-5 mb-4">
+                <div class="card card-premium p-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-plus-square text-indigo me-1"></i> Tambah
+                        Kategori Baru</h5>
+                    <p class="text-muted small mb-4">Buat kategori baru untuk mengelompokkan tulisan. Kategori baru akan
+                        otomatis muncul di opsi pembuatan tulisan.</p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="add_category" value="1">
+
+                        {% for field in category_form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark small">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle"></i> {{
+                                field.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <button type="submit" name="add_category"
+                            class="btn btn-premium w-100 py-2 mt-2 d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-check-circle"></i> <span>Tambahkan Kategori</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- EXISTING CATEGORIES -->
+            <div class="col-lg-7">
+                <div class="card card-premium p-4">
+                    <h5 class="fw-bold text-dark mb-4"><i class="bi bi-folder2-open text-indigo me-1"></i> Daftar
+                        Kategori Sedia</h5>
+
+                    {% if categories %}
+                    <div class="list-group list-group-flush">
+                        {% for cat in categories %}
+                        <div
+                            class="list-group-item px-0 py-3 d-flex align-items-center justify-content-between border-bottom">
+                            <div class="pe-3">
+                                <h6 class="fw-bold text-dark m-0">🏷️ {{ cat.name }}</h6>
+                                <p class="text-muted small m-0 mt-1">
+                                    {% if cat.description %}
+                                    {{ cat.description|truncatechars:70 }}
+                                    {% else %}
+                                    Tidak ada deskripsi.
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <span class="badge rounded-pill bg-light text-dark border px-3 py-2 small"
+                                style="white-space: nowrap;">
+                                {{ cat.post_count }} Catatan
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="py-4 text-center">
+                        <i class="bi bi-tags text-muted" style="font-size: 2.5rem;"></i>
+                        <p class="text-muted small mt-2">Belum ada kategori terdaftar.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
